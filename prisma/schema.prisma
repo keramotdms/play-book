@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Mirrors the Firestore `users/{uid}` document from the spec (single-user app).
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String   @default("")
+  phone        String   @default("")
+  bio          String   @default("")
+  avatarUrl    String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Mirrors `users/{uid}/clients/{clientId}`.
+// Prisma/SQLite cannot store lists or maps, so social handles and the ICP
+// checklist are flattened into columns and tags are comma-joined strings.
+model Client {
+  id                  String    @id @default(cuid())
+  name                String
+  niche               String    @default("")
+  email               String    @default("")
+  phone               String    @default("")
+  socialLinkedin      String    @default("")
+  socialInstagram     String    @default("")
+  socialX             String    @default("")
+  socialOther         String    @default("")
+  imageUrl            String    @default("")
+  icpScore            Int       @default(0)
+  icpTier             String    @default("low_potential") // best | potential | low_potential
+  icpHasPaidOffer     Boolean   @default(false)
+  icpHasEmailList     Boolean   @default(false)
+  icpRightAudience    Boolean   @default(false)
+  icpGenericCopy      Boolean   @default(false)
+  icpPostedRecently   Boolean   @default(false)
+  status              String    @default("new") // new | outreach_sent | follow_up_1_sent | follow_up_2_sent | replied | client | cold_lead
+  scriptUsedInitial   String?
+  scriptUsedFollowup1 String?
+  scriptUsedFollowup2 String?
+  outreachSentAt      DateTime?
+  followUp1SentAt     DateTime?
+  followUp2SentAt     DateTime?
+  repliedAt           DateTime?
+  notes               String    @default("")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([status])
+}
+
+// Mirrors `users/{uid}/outreach_scripts/{scriptId}`.
+model OutreachScript {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  type      String   @default("initial") // initial | followup_1 | followup_2
+  tags      String   @default("") // comma-joined
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Mirrors `users/{uid}/copies/{copyId}`.
+model Copy {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  nicheTag    String   @default("Other")
+  framework   String   @default("custom")
+  clientIdRef String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Mirrors `users/{uid}/learn_progress/{lessonId}`.
+model Lesson {
+  id          String   @id @default(cuid())
+  module      String
+  moduleOrder Int
+  lessonOrder Int
+  title       String
+  completed   Boolean  @default(false) // EVERYTHING starts false — nothing pre-checked
+  isCustom    Boolean  @default(false)
+  sourceUrl   String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([moduleOrder, lessonOrder])
+}

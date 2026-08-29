@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// Copy Playbook — Cloud Storage security rules.
+// Client photos are uploaded SERVER-SIDE via the Firebase Admin SDK
+// (POST /api/upload → client_photos/{uid}/…), which bypasses these rules.
+// Read access uses permanent per-file download tokens embedded in the URL.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /client_photos/{userId}/{allPaths=**} {
+      allow read:  if request.auth != null && request.auth.uid == userId;
+      allow write: if false; // uploads only through the Admin SDK backend
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
