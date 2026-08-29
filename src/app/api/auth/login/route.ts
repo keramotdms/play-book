@@ -3,6 +3,7 @@ import { currentBackend } from "@/lib/backend";
 import { createSessionToken, setSessionValue, toSafeUser } from "@/lib/auth";
 import { getStore } from "@/lib/store";
 import { verifyPassword } from "@/lib/password";
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
