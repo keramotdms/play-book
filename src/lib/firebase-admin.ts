@@ -1,25 +1,29 @@
 import "server-only";
-import * as admin from "firebase-admin";
+import { getApps, initializeApp, cert, type App } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 
 /**
  * Lazily-initialised Firebase Admin SDK singleton.
  */
-export function firebaseApp(): admin.app.App {
-  if (admin.apps.length > 0) {
-    return admin.apps[0]!;
+export function firebaseApp(): App {
+  const existing = getApps();
+  if (existing.length > 0) {
+    return existing[0];
   }
 
   const saJson = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (saJson) {
     const sa = JSON.parse(saJson);
-    return admin.initializeApp({
-      credential: admin.credential.cert(sa),
+    return initializeApp({
+      credential: cert(sa),
       storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || undefined,
     });
   }
 
-  return admin.initializeApp({
-    credential: admin.credential.cert({
+  return initializeApp({
+    credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: (process.env.FIREBASE_PRIVATE_KEY ?? "").replace(/\\n/g, "\n"),
@@ -29,13 +33,13 @@ export function firebaseApp(): admin.app.App {
 }
 
 export function adminAuth() {
-  return firebaseApp().auth();
+  return getAuth(firebaseApp());
 }
 
 export function adminDb() {
-  return firebaseApp().firestore();
+  return getFirestore(firebaseApp());
 }
 
 export function adminBucket() {
-  return firebaseApp().storage().bucket();
+  return getStorage(firebaseApp()).bucket();
 }
