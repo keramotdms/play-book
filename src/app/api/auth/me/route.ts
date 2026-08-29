@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSessionUser, toSafeUser } from "@/lib/auth";
 import { getStore } from "@/lib/store";
+export const runtime = "nodejs";
+
 
 export async function GET() {
   try {
