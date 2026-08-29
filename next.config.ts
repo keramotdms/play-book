@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ["firebase-admin"],
-  },
+  output: "standalone",
+  serverExternalPackages: ["firebase-admin"],
 };
 
 export default nextConfig;
